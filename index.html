@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html class="theme-dark" lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CANTEEN STUDIO | LP</title>
+  <style>
+    :root{
+      --bg:#fff; --mint:#fff; --green:#36af35; --green-600:#2d982d;
+      --ink:#0d1b12; --muted:#7a8a7e; --white:#fff;
+      --container:1120px; --radius:0px; --shadow:0 10px 20px rgba(0,0,0,.06);
+      --shadow-card:0 6px 14px rgba(0,0,0,.06);
+      --grid-gap:14px;
+      --hero-gap:.60em;
+      --mosaic-cols: 8; --mosaic-rows: 2;
+      --equip-max: 1040px;
+
+      /* 追加：ロゴ基準高さ（PC/SM） */
+      --logo-h: 34px;
+      --logo-h-sm: 22px;
+    }
+
+    html{ scroll-behavior:smooth; }
+    *,*::before,*::after{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Hiragino Kaku Gothic ProN','Noto Sans JP','Yu Gothic',Meiryo,Arial,sans-serif;
+      color:var(--ink); background:var(--bg); line-height:1.65; font-synthesis:none;
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; font-feature-settings:"palt" 1, "liga" 1;
+    }
+    img{ max-width:100%; display:block; }
+    a{ color:inherit; text-decoration:none; }
+    h1,h2,h3,h4,p{ margin:0; }
+
+    .container{ width:min(100% - 32px,var(--container)); margin-inline:auto; }
+    .section{ padding:64px 0; scroll-margin-top:80px; }
+
+    /* ===== Title (h2) ===== */
+    .title{ text-align:center; color:#000; letter-spacing:normal; font-weight:300; text-wrap:balance; }
+    .title > span{
+      display:inline-block; font-weight:300; font-size:clamp(20px,3.2vw,25px); color:#000;
+      white-space:normal; word-break:keep-all; overflow-wrap:anywhere;
+    }
+    h2.title > span{ position:relative; }
+    h2.title > span::after{
+      content:""; display:block; height:2px; width:100%; background:var(--green);
+      margin:14px auto 0; border-radius:2px;
+    }
+    .divider{ display:none; }
+
+    /* ===== Header ===== */
+    header{
+      position:sticky; top:0; z-index:70; backdrop-filter:saturate(180%) blur(8px);
+      background:linear-gradient(0deg,rgba(255,255,255,.65),rgba(255,255,255,.92));
+      border-bottom:1px solid rgba(0,0,0,.06);
+    }
+    .nav{ display:flex; align-items:center; justify-content:space-between; min-height:56px; padding-block:8px; }
+    .brand{ display:flex; align-items:center; gap:0; font-weight:700; letter-spacing:.25em; flex-shrink:0; } /* ←収縮防止を追加 */
+    /* 置き換え：ロゴは高さ固定＋収縮禁止 */
+    .brand__img{
+      display:block;
+      height: var(--logo-h);
+      width:auto;
+      max-height:none;
+      image-rendering:-webkit-optimize-contrast;
+      flex: 0 0 auto; /* ←flexで縮まない */
+    }
+    .nav ul{ display:flex; list-style:none; gap:20px; padding:0; margin:0; }
+    .nav a{ font-size:13px; letter-spacing:.2em; color:var(--muted); font-weight:400; position:relative; display:inline-block; }
+    .nav a:hover{ color:var(--ink); }
+    .nav a::after{
+      content:""; position:absolute; left:0; right:0; bottom:-6px; margin:auto; width:0; height:1px;
+      background: currentColor; opacity:.45; transition: width .18s ease, opacity .18s ease;
+    }
+    .nav a:hover::after{ width:100%; opacity:.85; }
+
+    /* Hamburger */
+    .nav__toggle{
+      display:none; position:relative; align-items:center; justify-content:center;
+      width:40px; height:40px; border-radius:10px; border:1px solid rgba(0,0,0,.08);
+      background:#fff; cursor:pointer; transition:filter .2s ease, transform .06s ease;
+    }
+    .nav__toggle:active{ transform:translateY(1px); }
+    .nav__toggle span{
+      position:absolute; left:50%; transform:translateX(-50%);
+      width:22px; height:2px; background:#0c0f0d; border-radius:2px;
+      transition:transform .18s ease, opacity .18s ease, top .18s ease;
+    }
+    .nav__toggle span:nth-child(1){ top:12px; }
+    .nav__toggle span:nth-child(2){ top:19px; }
+    .nav__toggle span:nth-child(3){ top:26px; }
+    .nav__toggle[aria-expanded="true"] span:nth-child(1){ top:19px; transform:translateX(-50%) rotate(45deg); }
+    .nav__toggle[aria-expanded="true"] span:nth-child(2){ opacity:0; }
+    .nav__toggle[aria-expanded="true"] span:nth-child(3){ top:19px; transform:translateX(-50%) rotate(-45deg); }
+
+    /* ===== Mobile Drawer ===== */
+    .mm{ position:fixed; inset:0; z-index:120; background:rgba(0,0,0,.35); opacity:0; pointer-events:none; transition:opacity .18s ease; }
+    .mm__panel{
+      position:absolute; right:0; top:0; height:100%; width:min(78vw,360px);
+      background:#fff; box-shadow:-10px 0 30px rgba(0,0,0,.08);
+      transform:translateX(100%); transition:transform .22s ease;
+      display:flex; flex-direction:column; padding:18px;
+    }
+    .mm__links{ list-style:none; padding:12px 0 0; margin:0; display:flex; flex-direction:column; gap:2px; }
+    .mm__links a{ display:block; padding:14px 8px; border-radius:10px; font-size:14px; letter-spacing:.2em; color:#0d1b12; }
+    .mm__links a:hover{ background:rgba(0,0,0,.04); }
+    .mm.is-open{ opacity:1; pointer-events:auto; }
+    .mm.is-open .mm__panel{ transform:none; }
+    body.menu-open{ overflow:hidden; }
+
+    /* ===== Hero ===== */
+    .hero{
+      position:relative; min-height:44svh; display:grid; place-items:center; overflow:hidden;
+      background:#0b0b0b; color:var(--white);
+      height:calc(100vw / var(--mosaic-cols) * var(--mosaic-rows));
+    }
+    .hero__bg{ position:absolute; inset:0; background:url('https://dl.dropboxusercontent.com/scl/fi/v2e5qk1jnlefdkmr3q9z5/studio.jpg?rlkey=i0s1lqx5dddb3ojb124op52e6&raw=1') center/cover no-repeat; opacity:.35; filter:grayscale(.2) contrast(1.05); display:none; }
+    .hero__overlay{ position:absolute; inset:0; background:rgba(0,0,0,.65); pointer-events:none; z-index:1; }
+    .hero__inner{ position:relative; text-align:center; padding:64px 0; z-index:2; }
+    .hero__ttl{
+      display:inline-block; font-weight:300; line-height:1.25;
+      font-size:clamp(32px,3.8vw + 8px,56px);
+      letter-spacing:0; white-space:nowrap;
+    }
+    .hero__ttl .word{ display:inline-flex; gap:0.18em; align-items:baseline; }
+    .hero__ttl .wd{ display:inline-block; width:var(--hero-gap); height:1em; }
+
+    /* Mosaic */
+    .hero__mosaic{ position:absolute; inset:0; z-index:0; overflow:hidden; display:grid; grid-template-columns:repeat(var(--mosaic-cols),1fr); gap:0; }
+    .hero__mosaic .tile{ aspect-ratio:1/1; overflow:hidden; }
+    .hero__mosaic .tile img{ width:100%; height:100%; object-fit:cover; display:block; filter:grayscale(.05) contrast(1.02); transform:translateZ(0); will-change:transform; }
+
+    /* ===== WORKS ===== */
+    .works__grid{ display:grid; grid-template-columns:repeat(6,1fr); gap:var(--grid-gap); margin-top:28px; }
+    .work{ position:relative; display:block; aspect-ratio:1; overflow:hidden; box-shadow:var(--shadow-card); background:#f2f4f3; transform:translateZ(0);
+      transition:transform .18s ease, box-shadow .18s ease; isolation:isolate;
+    }
+    .work img{ width:100%; height:100%; object-fit:cover; display:block; transition:transform .25s ease; }
+    .work:hover img{ transform:scale(1.02); }
+    .work::after{ content:""; position:absolute; inset:0; pointer-events:none; z-index:1; box-shadow: inset 0 0 0 1px rgba(255,255,255,.04); transition: opacity .18s ease; opacity:0; }
+    .work:hover{ transform: translateY(-2px); box-shadow: 0 10px 26px rgba(0,0,0,.16); }
+    .work:hover::after{ opacity:1; }
+    .work:focus-visible{ outline:2px solid var(--green); outline-offset:2px; }
+    .more{ display:inline-block; margin:20px auto 0; padding:12px 22px; border-radius:8px; background:var(--green); color:#0f2a10; letter-spacing:.14em; font-size:12px; box-shadow:var(--shadow-card); font-weight:500; }
+    .more:hover{ background:var(--green-600); }
+
+    /* ===== ENGINEER ===== */
+    .engineer__cards{ display:grid; grid-template-columns:repeat(2,1fr); gap:24px; margin-top:28px; }
+    .engineer__card{ background:var(--white); overflow:hidden; box-shadow:0 6px 14px rgba(0,0,0,.05); border:1px solid rgba(0,0,0,.08); }
+    .engineer__img{ aspect-ratio:1/1; background:#0c0f0d; overflow:hidden; }
+    .engineer__img img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .engineer__body{ padding:16px; }
+    .engineer__person{ font-size:clamp(16px,1.6vw,18px); letter-spacing:.18em; font-weight:500; color:#fff; margin-bottom:6px; }
+    .engineer__name{ letter-spacing:.35em; font-size:12px; color:var(--muted); }
+    .engineer__text{ margin-top:8px; font-size:13px; color:#5d6b61; line-height:1.9; letter-spacing:.01em; font-variant-numeric:tabular-nums lining-nums; }
+
+    /* ===== PRICE ===== */
+    .price__rows{ display:grid; gap:24px; margin-top:28px; }
+    .price__row{ background:var(--white); overflow:hidden; border:1px solid rgba(0,0,0,.08); }
+    .price__head{ background:var(--green); color:#fff; letter-spacing:.26em; font-weight:800; padding:10px 16px; text-align:center; }
+    .price__grid{ display:grid; grid-template-columns:1fr 1fr; gap:0; }
+    .price__cell{ padding:18px 20px; border-top:1px solid rgba(0,0,0,.06); display:flex; flex-direction:column; gap:8px; }
+    .price__cell + .price__cell{ border-left:1px solid rgba(0,0,0,.06); }
+    .price__title{ order:-2; font-size:clamp(16px,1.8vw,18px); font-weight:600; letter-spacing:.22em; color:var(--ink); }
+    .price__yen{ margin-top:4px; font-weight:400; font-size:20px; letter-spacing:.15em; font-variant-numeric:lining-nums tabular-nums; }
+    .price__desc{ margin-top:10px; font-size:14px; color:#5b6b5d; line-height:1.9; letter-spacing:.05em; }
+
+    /* ===== STUDIO / EQUIPMENT ===== */
+    .studio{ background:var(--mint); }
+    .studio__hero{
+      width:100%; max-width:var(--equip-max); margin:22px auto 16px;
+      border:1px solid rgba(255,255,255,.08); border-radius:var(--radius); box-shadow:var(--shadow-card); overflow:hidden;
+    }
+    .studio__hero img{ display:block; width:100%; height:auto; object-fit:cover; }
+
+    .studio__panel{
+      margin-top:20px; background:var(--white); padding:22px;
+      border:1px solid rgba(0,0,0,.08); border-radius:var(--radius); color:#4e5d53; text-align:left;
+      display:flex; flex-direction:column; gap:18px; width:100%; max-width:var(--equip-max); margin-left:auto; margin-right:auto;
+    }
+    .studio__grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px; width:100%; justify-content:center; align-items:start; margin:0; }
+    h3.title{ text-align:left; }
+    h3.title span{ font-size:clamp(15.5px, 1.45vw, 17px); letter-spacing:.28em; color:#000; font-weight:600; }
+    h3.title span::after{ content:none; }
+    .studio__panel ul{ margin:0; padding-left:18px; line-height:1.9; font-size:clamp(14.8px,1.52vw,16.8px); }
+    .studio__note{ width:100%; max-width:var(--equip-max); color:#5d6b61; font-size:12px; line-height:1.8; margin:0 auto; }
+
+    /* ===== ORDER / CONTACT ===== */
+    #service .intro{
+      text-align:center; max-width:760px; margin:12px auto 0;
+      color:#5b6b5d; line-height:1.9; letter-spacing:.01em; font-size:clamp(15px, 1.6vw, 17px);
+    }
+    #service .list{ list-style:none; padding:0; margin:12px auto 0; text-align:center; color:#5b6b5d; line-height:1.9; letter-spacing:.01em; font-size:clamp(14px, 1.5vw, 16px); }
+    #service .list li + li{ margin-top:4px; }
+
+    #order .order__panel{
+      margin-top:20px; background:var(--white); border:1px solid rgba(0,0,0,.08);
+      box-shadow:var(--shadow-card); padding:22px; border-radius:var(--radius); text-align:center; color:#4e5d53;
+    }
+    #order .order__lead{ margin:4px 0 12px; color:var(--ink); font-size:clamp(14px, 1.4vw, 15px); line-height:1.9; letter-spacing:.01em; }
+    .order__btns{ display:grid; grid-template-columns:repeat(2, minmax(200px, 1fr)); gap:10px; max-width:600px; margin:0 auto; }
+    @media (max-width:520px){ .order__btns{ grid-template-columns:1fr; max-width:360px; } }
+    .order__btn{ display:flex; align-items:center; justify-content:center; height:52px; padding:0 22px; width:100%;
+      border-radius:10px; font-size:13px; letter-spacing:.14em; font-weight:500;
+      box-shadow: 0 10px 20px rgba(0,0,0,.08), 0 1px 0 rgba(255,255,255,.04) inset;
+      transition: transform .08s ease, filter .2s ease, box-shadow .2s ease;
+    }
+    .order__btn:hover{ transform: translateY(-1px); box-shadow: 0 14px 28px rgba(0,0,0,.12); filter:saturate(1.05); }
+    .order__btn--primary{ background:var(--green); color:#fff; font-weight:700; }
+    .order__btn--primary:hover,.order__btn--primary:focus-visible,.order__btn--primary:visited{ color:#fff; }
+    .order__btn--dark{ background:#0f1110; color:#fff; }
+    .order__btn .ico{ width:18px; height:18px; display:inline-block; flex:0 0 18px; line-height:0; margin-right:10px; }
+    .order__btn .ico svg{ width:100%; height:100%; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+    .order__note{ margin-top:10px; font-size:12px; color:#7a8a7e; line-height:1.8; }
+
+    footer{ padding:40px 0; color:#5e6b62; text-align:center; border-top:1px solid rgba(0,0,0,.06); }
+
+    /* 動き */
+    @media (prefers-reduced-motion:no-preference){
+      .reveal{ opacity:0; transform:translateY(14px); transition:opacity .6s ease, transform .6s ease; will-change: opacity, transform; }
+      .reveal.is-in{ opacity:1; transform:none; }
+      @keyframes fadeUp { from{opacity:0;transform:translateY(.35em)} to{opacity:1;transform:none} }
+      @keyframes slowZoom { 0%{transform:scale(1)} 100%{transform:scale(1.06)} }
+      .hero__mosaic .tile img{ animation: slowZoom 20s ease-in-out infinite alternate; animation-delay: calc(var(--zi, 0) * .25s); }
+    }
+
+    /* ====== Responsive ====== */
+    @media (max-width:1024px){
+      .works__grid{ grid-template-columns:repeat(5,1fr); }
+      :root{ --mosaic-cols:6; --mosaic-rows:3; }
+    }
+    @media (max-width:820px){
+      /* 置き換え：ロゴはSM高さに */
+      .brand__img{ height: var(--logo-h-sm); }
+      .nav ul{ display:none; }
+      .nav__toggle{ display:inline-flex; }
+      .works__grid{ grid-template-columns:repeat(4,1fr); }
+      .engineer__cards{ grid-template-columns:1fr; }
+      .price__grid{ grid-template-columns:1fr; }
+      .price__cell + .price__cell{ border-left:none; }
+      .studio__grid{ grid-template-columns:1fr; max-width:640px; margin:0 auto; }
+      .studio__note{ margin:0 auto; }
+      .hero__ttl{ white-space:normal; line-height:1.15; font-size:clamp(26px, 7vw, 40px); }
+      :root{ --hero-gap:.40em; --mosaic-cols:5; --mosaic-rows:3; }
+    }
+    @media (max-width:520px){
+      .works__grid{ grid-template-columns:repeat(3,1fr); }
+      :root{ --mosaic-cols:4; --mosaic-rows:4; }
+      .hero__ttl{ font-size:clamp(22px, 8vw, 34px); }
+      :root{ --hero-gap:.34em; }
+      .studio__grid{ max-width:100%; }
+    }
+    @media (max-width:820px){
+      .hero__ttl{ white-space:normal; line-height:1.1; }
+      .hero__ttl .wd{ display:block; width:100%; height:.35em; }
+    }
+
+    /* ===== Dark theme ===== */
+    .theme-dark{
+      --bg:#0c0f0e; --mint:#0c0f0e; --ink:#eaf0ec; --muted:#9aa4a0; --white:#141615;
+      --green:#39c238; --green-600:#2e9f2d; --shadow:0 10px 20px rgba(0,0,0,.35); --shadow-card:0 8px 20px rgba(0,0,0,.32);
+      --equip-max: var(--container);
+    }
+    .theme-dark header{ background:linear-gradient(0deg,rgba(14,16,15,.65),rgba(14,16,15,.92)); border-bottom:1px solid rgba(255,255,255,.06); }
+    .theme-dark .nav a{ color:var(--muted); }
+    .theme-dark .nav a:hover{ color:var(--ink); }
+    .theme-dark .nav__toggle{ background:#121414; border-color:rgba(255,255,255,.07); }
+    .theme-dark .nav__toggle span{ background:#e6ebe8; }
+    .theme-dark .mm{ background:rgba(0,0,0,.5); }
+    .theme-dark .mm__panel{ background:#111514; box-shadow:-10px 0 30px rgba(0,0,0,.6); }
+    .theme-dark .mm__links a{ color:var(--ink); }
+    .theme-dark .mm__links a:hover{ background:rgba(255,255,255,.05); }
+    .theme-dark .hero{ color:#f5f7f6; }
+    .theme-dark .hero__overlay{ background:rgba(0,0,0,.62); }
+    .theme-dark .work{ background:#161917; }
+    .theme-dark .engineer__card,
+    .theme-dark .price__row,
+    .theme-dark #order .order__panel,
+    .theme-dark .studio__panel{ border-color:rgba(255,255,255,.08); box-shadow: 0 10px 24px rgba(0,0,0,.28); }
+    .theme-dark .title,
+    .theme-dark .title > span{ color:var(--ink); }
+    .theme-dark h2.title > span::after{ background:var(--green); }
+    .theme-dark #service .intro,
+    .theme-dark #service .list,
+    .theme-dark .engineer__text,
+    .theme-dark .price__desc,
+    .theme-dark .order__note,
+    .theme-dark .studio__note{ color:var(--muted); }
+    .theme-dark .order__btn--dark{ background:#0d0f0e; color:#fff; border:1px solid rgba(255,255,255,.06); }
+    .theme-dark footer{ color:#98a39e; border-top:1px solid rgba(255,255,255,.06); }
+    .theme-dark .studio__panel ul{ color:#fff; }
+    .theme-dark #order .order__lead{ color:var(--muted); }
+
+    /* Polished look */
+    :root { --ring: 0 0 0 2px color-mix(in oklab, var(--green) 75%, white); }
+    :where(a,button,[role="button"],.work):focus-visible{ outline:2px solid color-mix(in oklab, var(--green) 70%, white); outline-offset:2px; border-radius:8px; }
+
+    /* Underline animation on section hover */
+    h2.title > span::after{
+      height:2px; border-radius:2px;
+      background:linear-gradient(90deg, color-mix(in oklab, var(--green) 92%, white), color-mix(in oklab, var(--green) 72%, #0c0f0e));
+      transform:scaleX(.82); transform-origin:center; transition:transform .28s ease;
+    }
+    .section:hover h2.title > span::after{ transform:scaleX(1); }
+.price__btn {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin-top:10px;
+  padding:6px 14px;
+  font-size:12px;
+  letter-spacing:.12em;
+  color:#fff;
+  background:transparent;
+  border:1px solid #111;
+  border-radius:4px;
+  text-align:center;
+  transition:all .18s ease;
+  line-height:1.4;
+}
+.price__btn:hover {
+  background:#111;
+  color:#fff;
+  transform:translateY(-1px);
+}
+.theme-dark .price__btn {
+  border-color:#fff;
+  color:#fff;
+}
+.theme-dark .price__btn:hover {
+  background:#fff;
+  color:#0c0f0e;
+}
+
+ 
+  </style>
+</head>
+<body>
+  <!-- ===================== Header ===================== -->
+  <header>
+    <div class="container nav">
+      <!-- divのまま（ロゴ高さはCSSで固定） -->
+      <div class="brand" aria-label="CANTEEN">
+        <img
+          src="https://dl.dropboxusercontent.com/scl/fi/is97wxty7tbj7r60lsdpe/canteen_studio_logo_black.jpg?rlkey=rbla9t9i8qlhktvn6l701vi0a&raw=1"
+          alt="CANTEEN"
+          class="brand__img"
+          referrerpolicy="no-referrer"
+          decoding="async"
+        >
+      </div>
+
+      <ul>
+        <li><a href="#service">SERVICE</a></li>
+        <li><a href="#works">WORKS</a></li>
+        <li><a href="#engineer">ENGINEER</a></li>
+        <li><a href="#price">PRICE</a></li>
+        <li><a href="#order">CONTACT</a></li>
+        <li><a href="#studio">EQUIPMENT</a></li>
+      </ul>
+      <button class="nav__toggle" aria-label="メニュー" aria-controls="mobileMenu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===================== Mobile Drawer ===================== -->
+  <div id="mobileMenu" class="mm" hidden>
+    <div class="mm__panel" role="dialog" aria-modal="true" aria-label="メニュー">
+      <nav>
+        <ul class="mm__links">
+          <li><a href="#service">SERVICE</a></li>
+          <li><a href="#works">WORKS</a></li>
+          <li><a href="#engineer">ENGINEER</a></li>
+          <li><a href="#price">PRICE</a></li>
+          <li><a href="#order">CONTACT</a></li>
+          <li><a href="#studio">EQUIPMENT</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <!-- ===================== Hero ===================== -->
+  <section class="hero" aria-label="Hero">
+    <div class="hero__mosaic" aria-hidden="true"></div>
+    <div class="hero__bg" aria-hidden="true"></div>
+    <div class="hero__overlay" aria-hidden="true"></div>
+    <div class="hero__inner container">
+      <h1 class="hero__ttl">
+        C A N T E E N<span class="wd" aria-hidden="true"></span>M U S I C
+        <span class="wd" aria-hidden="true"></span>S T U D I O
+      </h1>
+    </div>
+  </section>
+
+  <!-- ===================== SERVICE ===================== -->
+  <section id="service" class="section reveal">
+    <div class="container">
+      <h2 class="title"><span>SERVICE</span></h2>
+      <p class="intro">
+        CANTEENはヒップホップ・アーティスト／DJのマネジメントから出発したチームです。<br>
+        これまで社内の契約アーティスト／プロデューサー向けに行ってきたミックス／マスタリングを、
+        幅広いアーティストの皆さま、そして「どこに依頼すべきか迷っている」方に向けて、紹介制から一般案件へ開放いたします。<br>
+        完全オンラインで、あなたの音楽を完成までサポートします。<br>
+        <small>※ 本サービスはMixing/Masteringに特化した業務提供です。アーティスト契約や育成の募集は行っておりません。</small>
+      </p>
+    </div>
+  </section>
+
+  <!-- ===================== WORKS ===================== -->
+  <section id="works" class="section reveal">
+    <div class="container">
+      <h2 class="title"><span>WORKS</span></h2>
+      <div class="divider"></div>
+      <div class="works__grid" aria-label="Works grid">
+        <!-- 画像はそのまま -->
+        <a class="work" href="#"><img referrerpolicy="no-referrer" src="https://dl.dropboxusercontent.com/scl/fi/9m7w85ryjcuo9mxsum2ep/00000003.3105781.1759419599.0617orig.jpg?rlkey=thoaunfhi7skn003f5qxf9st2&raw=1" alt="Work DB 01" loading="lazy"></a>
+        <a class="work" href="#"><img referrerpolicy="no-referrer" src="https://dl.dropboxusercontent.com/scl/fi/rgk3qzz50fjjgdzftazei/100_TCJPR0000901066.jpg?rlkey=owblodnx20kwcs5khvptri6a7&raw=1" alt="Work DB 02" loading="lazy"></a>
+        <a class="work" href="#"><img referrerpolicy="no-referrer" src="https://dl.dropboxusercontent.com/scl/fi/4y01wlrebiyrvjen9osvt/00000003.1580828225.9474_180.jpg?rlkey=zxo1ngj8cyvttk4iykjt6tjn1&raw=1" alt="Work DB 03" loading="lazy"></a>
+        <a class="work" href="#"><img referrerpolicy="no-referrer" src="https://dl.dropboxusercontent.com/scl/fi/arwo0l2dti3mm0cn9zqaq/1200x630bb.jpg?rlkey=8eoalve8qsgyesdht0gm8lkom&raw=1" alt="Work DB 04" loading="lazy"></a>
+        <a class="work" href="#"><img referrerpolicy="no-referrer" src="https://dl.dropboxusercontent.com/scl/fi/scha7a5tj6vh819zdyks4/00000003.1643101233.6073_180.jpg?rlkey=c9xo00kakj86itque6txhx6l2&raw=1" alt="Work DB 05" loading="lazy"></a>
+        <a class="work" href="#"><img referrerpolicy="no-referrer" src="https://dl.dropboxusercontent.com/scl/fi/xwjrt580i40cdxip9bb8v/7543.jpg?rlkey=1x54n045962xcmtjqozb1rswj&raw=1" alt="Work DB 07" loading="lazy"></a>
+        <a class="work" href="#"><img referrerpolicy="no-referrer" src="https://dl.dropboxusercontent.com/scl/fi/dfpne4a3nu8nu1g6zd3x1/ab67616d0000b2730d63da2e1d4f4e2414849e83.jpeg?rlkey=suqn4hap3ueg3bx0mgyss8qdr&raw=1" alt="Work DB 08" loading="lazy"></a>
+        <a class="work" href="#"><img referrerpolicy="no-referrer" src="https://dl.dropboxusercontent.com/scl/fi/oshbu5k7kgf7jz0zdeckc/itd1486384.png?rlkey=e5h741wa292yfgdsaq4ziw9ee&raw=1" alt="Work DB 09" loading="lazy"></a>
+        <a class="work" href="#"><img referrerpolicy="no-referrer" src="https://dl.dropboxusercontent.com/scl/fi/xk0xbtw5gqgxsbb520d96/00000003.1636639194.7484_180.jpg?rlkey=cbgll21bodgh1esi92oabomk1&raw=1" alt="Work 10" loading="lazy"></a>
+        <a class="work" href="#"><img referrerpolicy="no-referrer" src="https://dl.dropboxusercontent.com/scl/fi/33oi74v9gbrlo5ckjv3zk/ite886721.jpg?rlkey=89x6uc1c1q0fvfvonyjigaj6r&raw=1" alt="Work 11" loading="lazy"></a>
+        <a class="work" href="#"><img referrerpolicy="no-referrer" src="https://dl.dropboxusercontent.com/scl/fi/4fbw0l51ngl12s82jg99v/ite991213.jpg?rlkey=u6pn7xesumn9mz5aetkj5oyb8&raw=1" alt="Work 12" loading="lazy"></a>
+        <a class="work" href="#"><img referrerpolicy="no-referrer" src="https://dl.dropboxusercontent.com/scl/fi/nwn2w3wg5hl85mkurchcd/ite1025082.png?rlkey=qwoco5yqfj7yerjnskk78gna9&raw=1" alt="Work 13" loading="lazy"></a>
+        <a class="work" href="#"><img referrerpolicy="no-referrer" src="https://dl.dropboxusercontent.com/scl/fi/dcnude9qbauehlb4psk3r/ite1027047.png?rlkey=dji82yobrpqq8vhbs25wogrbg&raw=1" alt="Work 14" loading="lazy"></a>
+        <a class="work" href="#"><img referrerpolicy="no-referrer" src="https://dl.dropboxusercontent.com/scl/fi/beez74j9rrxp8w5qey9bt/ite1041857.png?rlkey=pfv7vqpqlh5lh45wi3rdhvobu&raw=1" alt="Work 15" loading="lazy"></a>
+        <a class="work" href="#"><img referrerpolicy="no-referrer" src="https://dl.dropboxusercontent.com/scl/fi/o4sw21w4cz7yuqno8h8tx/zero_two_final.png?rlkey=637qj44eqih1vlr7n037m7rn4&raw=1" alt="Work 16" loading="lazy"></a>
+        <a class="work" href="#"><img referrerpolicy="no-referrer" src="https://dl.dropboxusercontent.com/scl/fi/fv1hv5kui0yn9gdwudb04/images-1.jpeg?rlkey=73fwh737wokrz15t7izllfiu6&raw=1" alt="Work 17" loading="lazy"></a>
+        <a class="work" href="#"><img referrerpolicy="no-referrer" src="https://dl.dropboxusercontent.com/scl/fi/xro0w3mz1qfftgd4fv5xe/artwork-1-665x665.png?rlkey=pgxgkh35dt0k8tm2je4ipg0z0&raw=1" alt="Work 18" loading="lazy"></a>
+        <a class="work" href="#"><img referrerpolicy="no-referrer" src="https://dl.dropboxusercontent.com/scl/fi/quri8n7gintnggl17hayn/Big-Animal-Theory_Twofold.jpg?rlkey=ftlhpziqyhd9kp182xznvbp5x&raw=1" alt="Work 19" loading="lazy"></a>
+      </div>
+      <div style="text-align:center"><a class="more" href="#">MORE</a></div>
+    </div>
+  </section>
+
+  <!-- ===================== ENGINEER ===================== -->
+  <section id="engineer" class="section reveal">
+    <div class="container">
+      <h2 class="title"><span>ENGINEER</span></h2>
+      <div class="engineer__panel">
+        <div class="engineer__cards">
+          <article class="engineer__card">
+            <div class="engineer__img">
+              <img referrerpolicy="no-referrer" src="https://dl.dropboxusercontent.com/scl/fi/0b83vgi8twzelxjf6z0np/egl.jpg?rlkey=4zxgdnepyy3ml8yi5ntvfstku&raw=1" alt="EGL" loading="lazy">
+            </div>
+            <div class="engineer__body">
+              <div class="engineer__person">EGL</div>
+              <div class="engineer__name">PROFILE</div>
+              <p class="engineer__text">テキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキスト。</p>
+            </div>
+          </article>
+          <article class="engineer__card">
+            <div class="engineer__img">
+              <img referrerpolicy="no-referrer" src="https://dl.dropboxusercontent.com/scl/fi/1p1rc0lz31911dgxjxysf/ukd.jpg?rlkey=c2vsoyqx9cn0k7013ipnh93g1&raw=1" alt="UKD" loading="lazy">
+            </div>
+            <div class="engineer__body">
+              <div class="engineer__person">UKD</div>
+              <div class="engineer__name">PROFILE</div>
+              <p class="engineer__text">テキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキスト。</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PRICE ===================== -->
+  <section id="price" class="section reveal">
+    <div class="container">
+      <h2 class="title"><span>PRICE</span></h2>
+      <div class="price__rows">
+        <div class="price__row">
+          <div class="price__head">M I X I N G</div>
+          <div class="price__grid">
+            <div class="price__cell" style="grid-column:1/-1">
+				<div class="price__title">MIXING</div>
+              <div class="price__yen">¥45,000 / 1曲</div>
+              <p class="price__desc">
+                ・ご依頼時は、各トラックを頭出し位置を揃えたWAV/AIFF（24bit推奨）でご用意ください。クリップ／リミッター等の処理は外した素材をお送りください。<br>
+                ・併せて、テンポ（BPM）・キー・参考曲URL・曲順／構成の指示、（ある場合は）歌詞データもお知らせください。<br>
+                ・修正は内容に応じて随時対応します。<br>
+                ・なお、初期の楽曲コンセプトからの大幅な方向転換（例：ボーカルの全面録り直し、キーやテンポ変更に伴う再構築、編成／アレンジの抜本的変更、ビート差し替え、トラックの大幅入れ替えなど）は追加料金の対象となります（事前にご相談ください）。<br>
+                ・また、データ不備や差し替えが多い場合は納期が変動します。
+              </p>
+				<a href="#order" class="price__btn">このプランで依頼する</a>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="price__row">
+          <div class="price__head">M A S T E R I N G</div>
+          <div class="price__grid">
+            <div class="price__cell">
+              <div class="price__title">MASTERING</div>
+              <div class="price__yen">¥8,000 / 1曲</div>
+              <p class="price__desc">
+                ・ご依頼時は、ステレオ2MIX（WAV/AIFF・24bit推奨）をご用意ください。<br>
+				  ・リミッター／マキシマイザー等は外し、ピークに余裕（おおよそ-3〜-6dB）を確保してください。<br>
+                 ・併せて、テンポ（BPM）・参考曲URL・希望の雰囲気、配信用の想定（例：サブスク／YouTube 等）をお知らせください。<br>
+                 ・修正は2回まで無料です（3回目以降は内容に応じて追加）。<br>
+                 ・なお、クリップしている素材や過度な処理済み2MIXは音質低下の原因となります。ミックス段階の大幅な変更が必要な場合は、別途ミックス修正をご相談ください。<br>
+                 ・サンプリングレート／ビット深度は原音の設定に合わせて納品します（ご指定があれば対応します）。
+              </p>
+			<a href="#order" class="price__btn">このプランで依頼する</a>	
+            </div>
+            <div class="price__cell">
+              <div class="price__title">STEM MASTERING</div>
+              <div class="price__yen">¥12,000 / 1曲</div>
+              <p class="price__desc">
+                ・ご依頼時は、ステム（各パート別のWAV/AIFF・24bit推奨）を最大6本までご用意ください。7本目以降は1本ごとに＋¥1,000で対応します。<br>
+                ・すべてのステムは頭出し位置を統一し、リミッター／マキシマイザーは外した状態で、ピークに余裕（目安 -3〜-6dB）を確保してください。<br>
+                ・併せて、参考曲URL・希望の質感やラウドネスの目安（例：配信向け・YouTube向け など）をご共有ください。<br>
+                ・修正は2回まで無料です（3回目以降は内容に応じて追加）。<br>
+                ・クリップしている素材や過度な処理済みステムは音質低下の原因となります。大幅なミックス変更が必要な場合は別途ご相談ください。<br>
+				 ・サンプリングレート／ビット深度は原音の設定に合わせて納品します。 
+              </p>
+			<a href="#order" class="price__btn">このプランで依頼する</a>	
+            </div>
+          </div>
+        </div>
+
+        <div class="price__row">
+          <div class="price__head">O P T I O N</div>
+          <div class="price__grid">
+            <div class="price__cell">
+              <div class="price__title">DJ MIX Mastering</div>
+              <div class="price__yen">¥30,000 / 1MIX</div>
+              <p class="price__desc">
+                ・ご依頼時は、連続したステレオ2MIX（WAV/AIFF・24bit推奨）をご用意ください。リミッター／マキシマイザーは外し、ピークに余裕（目安 -3〜-6dB）を確保してください。<br>
+                ・併せて、トラックリスト（曲名・アーティスト・おおよその開始時刻）、想定プラットフォーム（例：配信／YouTube／クラブ上映用 など）、参考音源をご共有ください。<br>
+                ・マスタリングでは、全体のラウドネス／トーン／帯域バランスを整え、曲間の聴感レベル差・質感差を可能な範囲で補正します。不要なノイズやクリック等がある場合は軽微な処理を行います。<br>
+                ・修正は1回まで無料です（2回目以降は内容に応じて追加）。<br>
+                ・なお、クリップしている素材や過度な処理済みファイルは音質低下の原因となります。大幅な編集（曲順変更／差し替え／長尺の再構成 など）が必要な場合は別途ご相談ください。<br>
+                ・納品はWAV（原音のSR/bitに準拠）＋ご希望に応じて配信用フォーマット（例：MP3）をご用意します。
+              </p>
+			<a href="#order" class="price__btn">このプランで依頼する</a>	
+            </div>
+            <div class="price__cell">
+              <div class="price__title">複数曲・EP・アルバム</div>
+              <div class="price__yen">プロジェクト単位でのご依頼</div>
+              <p class="price__desc">
+                ・EP / アルバムなど、プロジェクト単位でのご依頼に対応します。<br>
+                ・複数曲を同時にご依頼の場合はディスカウント可（工程の共通化：リファレンス／セッション構成／テンプレート共有 等）。<br>
+                曲数・尺・納期・アレンジの共通度合い・2mix／Stemの混在有無を踏まえて個別にお見積りいたします。<br>
+                ・納品は曲別WAV（ご指定があれば配信用フォーマットも可）／バージョン違い（インスト／アカペラ 等）への対応もご相談ください。<br>
+                ・まずはプロジェクト概要・曲数・締切・参考音源をお知らせください。
+              </p>
+			<a href="#order" class="price__btn">このプランで依頼する</a>	
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ORDER / CONTACT ===================== -->
+  <section id="order" class="section reveal">
+    <div class="container">
+      <h2 class="title"><span>ORDER / CONTACT</span></h2>
+      <div class="order__panel" aria-label="Order panel">
+        <p class="order__lead">
+          ご依頼/お問い合わせは下記のいずれかからご連絡ください。<br>ご依頼の概要（ミックス/マスタリング/楽曲数／納期／参考音源）をお送りいただけるとスムーズです。
+        </p>
+        <div class="order__btns">
+          <a class="order__btn order__btn--dark"
+             href="https://www.instagram.com/＜あなたのハンドル＞/"
+             target="_blank" rel="noopener"
+             aria-label="InstagramのDMで連絡する">
+            <span class="ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <rect x="3" y="3" width="18" height="18" rx="5"></rect>
+                <circle cx="12" cy="12" r="4.5"></circle>
+                <circle cx="17.2" cy="6.8" r="1.2"></circle>
+              </svg>
+            </span>
+            Instagram DM
+          </a>
+
+          <a class="order__btn order__btn--dark"
+             href="mailto:contact@canteen.example?subject=%E3%80%90%E4%BE%9D%E9%A0%BC%E3%80%91Mix%2FMastering%20%E3%82%A2%E3%83%BC%E3%83%86%E3%82%A3%E3%82%B9%E3%83%88%E5%90%8D%20-%20%E6%A5%BD%E6%9B%B2%E5%90%8D&body=%E3%80%90%E6%A5%BD%E6%9B%B2%E6%95%B0%E3%80%91%200%E6%9B%B2%0D%0A%E3%80%90%E7%A8%AE%E5%88%A5%E3%80%91%20Mix%20%2F%20Mastering%20%2F%20Stem%20Mastering%0D%0A%E3%80%90%E7%B4%8D%E6%9C%9F%E3%80%91%20%0D%0A%E3%80%90%E5%8F%82%E8%80%83%E9%9F%B3%E6%BA%90%E3%80%91%20URL%E7%AD%89%0D%0A%E3%80%90%E3%81%9D%E3%81%AE%E4%BB%96%E3%80%91%20"
+             aria-label="メールで依頼する">
+            <span class="ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+                <path d="M3 7l9 6 9-6"></path>
+              </svg>
+            </span>
+            メールで依頼
+          </a>
+        </div>
+        <p class="order__note">※ 送付データはWAV/AIFFに対応（ご要望フォーマットで納品可能）／大容量は各種ストレージのURLでお送りください。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== STUDIO / EQUIPMENT ===================== -->
+  <section id="studio" class="section studio reveal">
+    <div class="container">
+      <h2 class="title"><span>STUDIO / EQUIPMENT</span></h2>
+      <figure class="studio__hero">
+        <img referrerpolicy="no-referrer" src="https://dl.dropboxusercontent.com/scl/fi/2modene0vkbtwentsspnk/studio_.jpg?rlkey=petdfoydblymx6w8wnfhabxu2&raw=1" alt="CANTEEN STUDIO Control Room" loading="lazy" decoding="async">
+      </figure>
+      <div class="studio__panel">
+        <div class="studio__grid">
+          <section><h3 class="title"><span>DAW</span></h3><ul><li>PreSonus Studio One Pro 7</li><li>Ableton Live 12</li></ul></section>
+          <section><h3 class="title"><span>AD/DA CONVERTER</span></h3><ul><li>RME ADI-2/4 Pro SE</li></ul></section>
+          <section><h3 class="title"><span>MONITOR SYSTEM</span></h3><ul><li>Focal Trio6 ＋ Sub6(2.1ch)</li><li>ADAM Audio A7V</li><li>ACOUSTIC REVIVE/RSS-600 STAND</li></ul></section>
+          <section><h3 class="title"><span>HEADPHONE</span></h3><ul><li>Focal Clear MG Pro</li><li>Audeze LCD-X 2011</li><li>Audeze LCD-MX4</li><li>beyerdynamic DT990PRO</li></ul></section>
+          <section><h3 class="title"><span>MIC</span></h3><ul><li>Universal Audio Sphere DLX</li></ul></section>
+          <section><h3 class="title"><span>OUTBOARD</span></h3><ul><li>Bettermaker Mastering Limiter 2.0</li></ul></section>
+          <section><h3 class="title"><span>POWER SUPPLY</span></h3><ul><li>電源ユニット</li></ul></section>
+          <section><h3 class="title"><span>CABLE</span></h3><ul><li>ACOUSTIC REVIVE USB CABLE R-AU1-PL</li><li>OYAIDE</li><li>MOGAMI</li></ul></section>
+          <section><h3 class="title"><span>PLUGIN</span></h3><ul><li>プラグインは一例です。</li><li>UAD/UADx各種, Fabfilter, Waves, Plugin Alliance 等各種</li></ul></section>
+          <section><h3 class="title"><span>SYSTEM / ROOM</span></h3><ul><li>MacBook Pro M3 Max / MacBook Pro M4 Pro</li><li>Sample Rate：44.1–96 kHz</li><li>Acoustic Treatment：完全防音/吸音/拡散</li><li>UPS / Power：Furman / Isolator</li></ul></section>
+        </div>
+        <p class="studio__note">※ 機材は案件に応じて変更される場合があります。詳細はお問い合わせください。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== Footer ===================== -->
+  <footer id="contact">
+    <div class="container"><small>© CANTEEN STUDIO</small></div>
+  </footer>
+
+  <!-- ===== JS ===== -->
+  <script>
+    function readCSSNumber(varName, fallback){
+      const v = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+      const n = parseFloat(v);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    // 1) ヒーローモザイク（WORKSから拝借）
+    (function () {
+      let rafId = null;
+      function buildMosaic(){
+        const mosaic = document.querySelector('.hero__mosaic');
+        if (!mosaic) return;
+
+        const cols = readCSSNumber('--mosaic-cols', 8);
+        const rows = readCSSNumber('--mosaic-rows', 2);
+        const need = Math.max(1, Math.floor(cols * rows));
+
+        const imgs = Array.from(document.querySelectorAll('#works .works__grid img'))
+          .map(img => (img.getAttribute('src') || img.currentSrc || '').trim())
+          .filter(src => src.length > 0);
+
+        const unique = []; const seen = new Set();
+        for (const src of imgs) { if (!seen.has(src)) { seen.add(src); unique.push(src); } }
+
+        const picks = [];
+        for (let i=0; i<need; i++){ picks.push(unique[i % unique.length]); }
+
+        mosaic.innerHTML = '';
+        picks.forEach((src, i) => {
+          const tile = document.createElement('div'); tile.className = 'tile';
+          const el = document.createElement('img'); el.src = src; el.alt = '';
+          el.style.setProperty('--zi', (i % 12));
+          tile.appendChild(el); mosaic.appendChild(tile);
+        });
+      }
+      function schedule(){ if (rafId) cancelAnimationFrame(rafId); rafId = requestAnimationFrame(buildMosaic); }
+      document.addEventListener('DOMContentLoaded', schedule);
+      window.addEventListener('load', schedule);
+      window.addEventListener('resize', schedule);
+      ['(max-width: 1024px)','(max-width: 820px)','(max-width: 520px)'].forEach(q=>window.matchMedia(q).addEventListener?.('change', schedule));
+    })();
+
+    // 2) スクロールでふわっと
+    (function(){
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReduced) { document.querySelectorAll('.reveal').forEach(el => el.classList.add('is-in')); return; }
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } });
+      }, { threshold: 0.12, rootMargin: '0px 0px -4%' });
+      document.addEventListener('DOMContentLoaded', () => { document.querySelectorAll('.reveal').forEach(el => io.observe(el)); });
+    })();
+
+    // 3) モバイルメニュー
+    (function(){
+      const btn = document.querySelector('.nav__toggle');
+      const mm  = document.getElementById('mobileMenu');
+      if(!btn || !mm) return;
+
+      function open(){
+        mm.hidden = false;
+        requestAnimationFrame(()=>{ mm.classList.add('is-open'); });
+        btn.setAttribute('aria-expanded','true');
+        document.body.classList.add('menu-open');
+      }
+      function close(){
+        mm.classList.remove('is-open');
+        btn.setAttribute('aria-expanded','false');
+        document.body.classList.remove('menu-open');
+        setTimeout(()=>{ if(!mm.classList.contains('is-open')) mm.hidden = true; }, 220);
+      }
+      function toggle(){ (mm.classList.contains('is-open')) ? close() : open(); }
+
+      btn.addEventListener('click', toggle);
+      mm.addEventListener('click', (e)=>{ if(e.target === mm) close(); });
+      document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') close(); });
+      mm.querySelectorAll('a').forEach(a=> a.addEventListener('click', close));
+    })();
+  </script>
+</body>
+</html>
